@@ -1,10 +1,8 @@
-
-
 service: sls
 
 custom:
   settings:
-    USER_TABLE: users
+    QUESTION_TABLE: questions
 
 provider:
   name: aws
@@ -21,59 +19,63 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.USER_TABLE}"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.QUESTION_TABLE}"
 
 functions:
-  createUser:
-    handler: handler.createUser
+  postQuestion:
+    handler: handler.postQuestion
     events:
-    - http:
-        path: /addUser
-        method: post
+      - http:
+          path: /postQuestion
+          method: post
 
-  getAllUsers:
-    handler: handler.getAllUsers
+  getAllQuestions:
+    handler: handler.getAllQuestions
     events:
-    - http:
-        path: /getUsers
-        method: get
+      - http:
+          path: /getQuestions
+          method: get
 
-
-  getUser:
-    handler: handler.getUser
+  getQuestionByUser:
+    handler: handler.getQuestionByUser
     events:
-    - http:
-        path: /getUser/{id}
-        method: get
+      - http:
+          path: /getQuestions/{user}
+          method: get
 
-  updateUser:
-    handler: handler.updateUser
+  getQuestionByTitle:
+    handler: handler.getQuestionByTitle
     events:
-    - http:
-        path: /updateUser/{id}
-        method: put
+      - http:
+          path: /getQuestionsTitle/{title}
+          method: get
 
-  deleteUser:
-    handler: handler.deleteUser
+  updateQuestion:
+    handler: handler.updateQuestion
     events:
-    - http:
-        path: /deleteUser/{id}
-        method: delete
+      - http:
+          path: /updateQuestion/{id}
+          method: put
 
+  deleteQuestion:
+    handler: handler.deleteQuestion
+    events:
+      - http:
+          path: /deleteQuestion/{id}
+          method: delete
 
 resources:
   Resources:
-    UserTable:
+    QuestionTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-        - AttributeName: "id"
-          AttributeType: "S"
+          - AttributeName: "id"
+            AttributeType: "S"
         KeySchema:
-        - AttributeName: "id"
-          KeyType: "HASH"
+          - AttributeName: "id"
+            KeyType: "HASH"
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:custom.settings.USER_TABLE}
-
+        TableName: ${self:custom.settings.QUESTION_TABLE}
